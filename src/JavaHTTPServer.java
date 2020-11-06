@@ -115,122 +115,31 @@ public class JavaHTTPServer implements Runnable{
             StringTokenizer parse = new StringTokenizer(input);  // parse the request with string tokenizer
             String method = parse.nextToken().toUpperCase(); // get the HTTP method of client
             fileRequested = parse.nextToken().toLowerCase();  // get file requested
-            in.readLine();
-            in.readLine();
-            in.readLine();
-            in.readLine();
-            in.readLine();
-            in.readLine();
-            in.readLine();
-            in.readLine();
-            in.readLine();
-            in.readLine();
-            in.readLine();
-            in.readLine();
-            String cookieLine = in.readLine();
-            String[] cookieArr = cookieLine.split("; ");
 
             //get the cookie (yum)
             boolean hasCookie = false;
-            String cookieVal = "1";
-            Pattern pattern = Pattern.compile("time_visited=");
-            int valStart = cookieArr[2].indexOf('=') + 1;
-            int valEnd = cookieArr[2].length();
-            String currCookie = cookieArr[2].substring(valStart, valEnd);
-            //String currCookie = cookieVal;
-//            while((cookieLine = in.readLine()) != null) {
-//                Matcher matcher = pattern.matcher(cookieLine);
-//                if(matcher.find()) {
-//                    hasCookie = true;
-//                    StringTokenizer strTk = new StringTokenizer(cookieLine);
-//                    strTk.nextToken();
-//
-//                    String cookieName = strTk.nextToken();
-//
-//                    int valStart = cookieName.indexOf('=');
-//                    int valEnd = cookieName.indexOf(';');
-//                    cookieVal += cookieName.substring(valStart, valEnd);
-//                }
-//            }
+            String cookieVal = "";
+            Pattern pattern = Pattern.compile("time_visited");
+            StringBuilder sb = new StringBuilder();
+            while(sb.append(in.readLine()).length() > 0) {
+                String currLine = sb.toString();
+                Matcher matcher = pattern.matcher(currLine);
+                if(matcher.find()) {
+                    hasCookie = true;
 
-//            if(!fileRequested.equals("/visits.html")) {
-//                File file = new File(WEB_ROOT, fileRequested);
-//                int fileLength = (int) file.length();
-//                String content = getContentType(fileRequested);
-//
-//                if (method.equals("GET")) { // GET method so send content
-//                    byte[] fileData = readFileData(file, fileLength);
-//
-//                    // send HTTP Headers
-//                    out.println("HTTP/1.1 200 OK");
-//                    out.println("Server: Java HTTP Server from Kyle N.");
-//                    out.println("Date: " + new Date());
-//                    out.println("Content-type: " + content);
-//                    out.println("Content-length: " + fileLength);
-//                    if(!hasCookie) {
-//                        out.println("Set-Cookie: time_visited=1; " +
-//                                "Expires=Wed, 25 Nov 2020 07:28:00 GMT; " +
-//                                "Domain=eecslab-10.case.edu; " +
-//                                "Path=/ktn27");
-//                    }
-//                    else {
-//                        String visit_count = Integer.toString(Integer.parseInt(cookieVal) + 1);
-//                        System.out.println(visit_count);
-//                        out.println("Set-cookie: time_visited=" + visit_count + "; " +
-//                                "Expires=Wed, 25, Nov 2020 07:28:00 GMT; " +
-//                                "Domain=eecslab-10.case.edu; " +
-//                                "Path=/ktn27");
-//                    }
-//
-//                    out.println();
-//                    out.flush();
-//
-//                    dataOut.write(fileData, 0, fileLength);
-//                    dataOut.flush();
-//                }
-//
-//                if (verbose) {
-//                    System.out.println("File " + fileRequested + " of type " + content + " sent");
-//                }
-//            }
-//            else {
-//                if (method.equals("GET")) { // GET method so send content
-//
-//                    // send HTTP Headers
-//                    out.println("HTTP/1.1 200 OK");
-//                    out.println("Server: Java HTTP Server from Kyle N.");
-//                    out.println("Date: " + new Date());
-//                    out.println("Content-type: text/html");
-//                    if (!hasCookie) {
-//                        out.println("Set-Cookie: time_visited=1; " +
-//                                "Expires=Wed, 25 Nov 2020 07:28:00 GMT; " +
-//                                "Domain=eecslab-10.case.edu; " +
-//                                "Path=/ktn27");
-//                    } else {
-//                        String visit_count = Integer.toString(Integer.parseInt(cookieVal) + 1);
-//                        System.out.println(visit_count);
-//                        out.println("Set-cookie: time_visited=" + visit_count + "; " +
-//                                "Expires=Wed, 25, Nov 2020 07:28:00 GMT; " +
-//                                "Domain=eecslab-10.case.edu; " +
-//                                "Path=/ktn27");
-//                    }
-//
-//                    out.println();
-//                    out.flush();
-//
-////                    String visitCounter =
-////                            "<!DOCTYPE html>\n" +
-////                                    "<html lang=\"en\">\n" +
-////                                    "<head>\n" +
-////                                    "<meta charset=\"UTF-8\">\n" +
-////                                    "<title>Visit count</title>\n" +
-////                                    "</head>\n" +
-////                                    "<body>\n" +
-////                                    "<p>Your browser visited various URLs on this site " + visit_count + " times</p>\n" +
-////                                    "</body>\n" +
-////                                    "</html>";
-//                }
-//            }
+                    System.out.println(currLine);
+                    int valStart = currLine.indexOf("time_visited=") + 13;
+                    String newCookieVal = "";
+                    int currPos = valStart;
+                    while(currPos < currLine.length() && currLine.charAt(currPos) != ';'){
+                        newCookieVal += currLine.charAt(currPos);
+                        currPos++;
+                    }
+                    cookieVal += (Integer.parseInt(newCookieVal) + 1);
+                }
+                sb.delete(0, sb.length());
+            }
+
 
             File file = new File(WEB_ROOT, fileRequested);
             int fileLength = (int) file.length();
@@ -245,9 +154,17 @@ public class JavaHTTPServer implements Runnable{
                 out.println("Date: " + new Date());
                 out.println("Content-type: " + content);
                 out.println("Content-length: " + fileLength);
-                out.println("Set-Cookie: time_visited=" + currCookie + "; " +
-                        "Expires=Wed Dec 2, 2020;");
-
+                if(hasCookie) {
+                    int increaseCount = Integer.parseInt(cookieVal) + 1;
+                    out.println("Set-Cookie: time_visited=" + cookieVal + "; " +
+                            "Expires=Wed Dec 2, 2020;");
+                }
+                else {
+                    out.println("Set-Cookie: time_visited=1; " +
+                            "Expires=Wed Dec 2, 2020;");
+                }
+//                out.println("Set-Cookie: time_visited=1; " +
+//                        "Expires=Wed Dec 2, 2020;");
                 out.println();
                 out.flush();
 
