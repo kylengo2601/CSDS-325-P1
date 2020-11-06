@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -144,6 +146,7 @@ public class JavaHTTPServer implements Runnable{
             File file = new File(WEB_ROOT, fileRequested);
             int fileLength = (int) file.length();
             String content = getContentType(fileRequested);
+            boolean visitCount = fileRequested.equals("/visits.html");
 
             if (method.equals("GET")) { // GET method so send content
                 byte[] fileData = readFileData(file, fileLength);
@@ -168,7 +171,18 @@ public class JavaHTTPServer implements Runnable{
                 out.println();
                 out.flush();
 
-                dataOut.write(fileData, 0, fileLength);
+                if(fileRequested.equals("/visits.html")) {
+
+//                    int increaseCount = Integer.parseInt(cookieVal) + 1;
+//                    String htmlStr = Files.readString(Path.of("./visits.html"));
+//                    String countPara = "Your browser visited various URLs on this site " + increaseCount + " times.";
+//                    htmlStr = htmlStr.replace("$counter", countPara);
+//                    Files.writeString(Path.of("./visits.html"), htmlStr);
+                    dataOut.write(fileData, 0, fileLength);
+                }
+                else {
+                    dataOut.write(fileData, 0, fileLength);
+                }
                 dataOut.flush();
             }
 
