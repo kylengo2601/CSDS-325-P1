@@ -15,7 +15,7 @@ public class JavaHTTPServer implements Runnable{
     static FileInputStream propIn;
     static {
         try {
-            propIn = new FileInputStream("/home/ktn27/CSDS-325/src/config.properties");
+            propIn = new FileInputStream("E:/CSDS-325/src/config.properties");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -31,7 +31,7 @@ public class JavaHTTPServer implements Runnable{
     }
 
     static final File WEB_ROOT = new File(prop.getProperty("WEB_ROOT"));
-    //static final String FILE_NOT_FOUND = "/ktn27/404.html";
+    static final String FILE_NOT_FOUND = "/ktn27/404.html";
     static final int PORT = Integer.parseInt(prop.getProperty("PORT"));   // port to listen connection
 
 
@@ -72,7 +72,7 @@ public class JavaHTTPServer implements Runnable{
     }
 
     private void fileNotFound(PrintWriter out, OutputStream dataOut, String fileRequested) throws IOException {
-        File file = new File(WEB_ROOT, "/ktn27/404.html");
+        File file = new File(WEB_ROOT, FILE_NOT_FOUND);
         int fileLength = (int) file.length();
         String content = "text/html";
         byte[] fileData = readFileData(file, fileLength);
