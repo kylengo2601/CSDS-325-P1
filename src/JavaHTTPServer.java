@@ -1,12 +1,6 @@
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import org.jsoup.Jsoup;
+
+import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -59,6 +53,22 @@ public class JavaHTTPServer implements Runnable{
         byte[] fileData = new byte[fileLength];
 
         try {
+            fileIn = new FileInputStream(file);
+            fileIn.read(fileData);
+        }
+        finally {
+            if (fileIn != null) fileIn.close();
+        }
+
+        return fileData;
+    }
+
+    private byte[] readVisitFileData(File file, int fileLength) throws IOException {
+        FileInputStream fileIn = null;
+        byte[] fileData = new byte[fileLength];
+
+        try {
+
             fileIn = new FileInputStream(file);
             fileIn.read(fileData);
         }
@@ -146,7 +156,7 @@ public class JavaHTTPServer implements Runnable{
             File file = new File(WEB_ROOT, fileRequested);
             int fileLength = (int) file.length();
             String content = getContentType(fileRequested);
-            boolean visitCount = fileRequested.equals("/visits.html");
+            boolean visitCount = fileRequested.equals("/ktn27/visits.html");
 
             if (method.equals("GET")) { // GET method so send content
                 byte[] fileData = readFileData(file, fileLength);
@@ -171,14 +181,30 @@ public class JavaHTTPServer implements Runnable{
                 out.println();
                 out.flush();
 
-                if(fileRequested.equals("/visits.html")) {
+                if(fileRequested.equals("/ktn27/visits.html")) {
+                    int increaseCount = Integer.parseInt(cookieVal) + 1;
+                    try{
+                        FileWriter visitFileWriter = new FileWriter(WEB_ROOT + fileRequested);
+                        visitFileWriter.write("<!DOCTYPE html>\n" +
+                                "<html lang=\"en\">\n" +
+                                "<head>\n" +
+                                "<meta charset=\"UTF-8\">\n" +
+                                "<title>Visit count</title>\n" +
+                                "</head>\n" +
+                                "<body>\n" +
+                                "<p id=\"content\">Your browser visited various URLs on this site " + increaseCount + " times.</p>\n" +
+                                "</body>\n" +
+                                "</html>\n"
+                                );
+                        visitFileWriter.close();
+                    } catch (IOException e) {
+                        System.out.println("An error occured.");
+                        e.printStackTrace();
+                    }
 
-//                    int increaseCount = Integer.parseInt(cookieVal) + 1;
-//                    String htmlStr = Files.readString(Path.of("./visits.html"));
-//                    String countPara = "Your browser visited various URLs on this site " + increaseCount + " times.";
-//                    htmlStr = htmlStr.replace("$counter", countPara);
-//                    Files.writeString(Path.of("./visits.html"), htmlStr);
-                    dataOut.write(fileData, 0, fileLength);
+                    int newFileLength = (int) file.length();
+                    byte[] visitsFile = readFileData(file, newFileLength);
+                    dataOut.write(visitsFile, 0, newFileLength);
                 }
                 else {
                     dataOut.write(fileData, 0, fileLength);
