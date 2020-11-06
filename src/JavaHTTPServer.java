@@ -1,4 +1,4 @@
-import org.jsoup.Jsoup;
+
 
 import java.io.*;
 import java.net.*;
@@ -31,7 +31,7 @@ public class JavaHTTPServer implements Runnable{
     }
 
     static final File WEB_ROOT = new File(prop.getProperty("WEB_ROOT"));
-    static final String FILE_NOT_FOUND = prop.getProperty("FILE_NOT_FOUND");
+    //static final String FILE_NOT_FOUND = "/ktn27/404.html";
     static final int PORT = Integer.parseInt(prop.getProperty("PORT"));   // port to listen connection
 
 
@@ -63,22 +63,6 @@ public class JavaHTTPServer implements Runnable{
         return fileData;
     }
 
-    private byte[] readVisitFileData(File file, int fileLength) throws IOException {
-        FileInputStream fileIn = null;
-        byte[] fileData = new byte[fileLength];
-
-        try {
-
-            fileIn = new FileInputStream(file);
-            fileIn.read(fileData);
-        }
-        finally {
-            if (fileIn != null) fileIn.close();
-        }
-
-        return fileData;
-    }
-
     // return supported MIME Types
     private String getContentType(String fileRequested) {
         if (fileRequested.endsWith(".html"))
@@ -88,7 +72,7 @@ public class JavaHTTPServer implements Runnable{
     }
 
     private void fileNotFound(PrintWriter out, OutputStream dataOut, String fileRequested) throws IOException {
-        File file = new File(WEB_ROOT, FILE_NOT_FOUND);
+        File file = new File(WEB_ROOT, "/ktn27/404.html");
         int fileLength = (int) file.length();
         String content = "text/html";
         byte[] fileData = readFileData(file, fileLength);
