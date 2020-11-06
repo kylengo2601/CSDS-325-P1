@@ -15,7 +15,7 @@ public class JavaHTTPServer implements Runnable{
     static FileInputStream propIn;
     static {
         try {
-            propIn = new FileInputStream("E:/CSDS-325/src/config.properties");
+            propIn = new FileInputStream("/home/ktn27/CSDS-325/src/config.properties");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
